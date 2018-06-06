@@ -9,10 +9,12 @@
 import UIKit
 
 class TableTodoViewController: UITableViewController {
-let todoItems = ["Buy eggs", "Buy machine", "make project"]
+var todoItems = ["Buy eggs", "Buy machine", "make project"]
     override func viewDidLoad() {
         super.viewDidLoad()
     }
+    
+    //MARK: table initialisation
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "todoCell", for: indexPath)
         cell.textLabel?.text = todoItems[indexPath.row]
@@ -23,6 +25,7 @@ let todoItems = ["Buy eggs", "Buy machine", "make project"]
         return todoItems.count
     }
     
+    //MARK: Table view selecting method
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if  tableView.cellForRow(at: indexPath)!.accessoryType == .checkmark {
             tableView.cellForRow(at: indexPath)!.accessoryType = .none
@@ -34,24 +37,32 @@ let todoItems = ["Buy eggs", "Buy machine", "make project"]
         
     }
     
-//    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-//
-//        if  tableView.cellForRow(at: indexPath)!.accessoryType == UITableViewCellAccessoryType.checkmark {
-//            tableView.cellForRow(at: indexPath)!.accessoryType = UITableViewCellAccessoryType.none
-//            return indexPath
-//        } else {
-//            print ("Select")
-//
-//
-//            return indexPath
-//        }
-//
-//    }
-    override func tableView(_ tableView: UITableView, willDeselectRowAt indexPath: IndexPath) -> IndexPath? {
-        print ("Will Deselect")
-        return indexPath
+    
+    //MARK: Add Item aciton decloration
+    @IBAction func AddItem(_ sender: UIBarButtonItem) {
+        var alertTextField = UITextField()
+        
+        let alertForNameanItem = UIAlertController(title: "Add Item", message: "Name the deal", preferredStyle: .alert)
+        
+        let alertButtonPressed = UIAlertAction(title: "Add", style: .default) { (Alert) in
+            if alertTextField.text == "" {
+                self.todoItems.append("New Item")
+            } else {
+                self.todoItems.append(alertTextField.text!)
+            }
+            self.tableView.reloadData()
+        }
+        alertForNameanItem.addAction(alertButtonPressed)
+        
+        alertForNameanItem.addTextField { (AlertTextInput) in
+            AlertTextInput.placeholder = "Here..."
+            alertTextField = AlertTextInput
+        }
+        present(alertForNameanItem, animated: true)
+        
+        
+        
     }
     
-
 }
 
