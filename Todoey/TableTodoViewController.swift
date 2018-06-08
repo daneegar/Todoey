@@ -9,8 +9,12 @@
 import UIKit
 
 class TableTodoViewController: UITableViewController {
-var todoItems = ["Buy eggs", "Buy machine", "make project"]
+    var todoItems = ["Buy eggs", "Buy machine", "make project"]
+    var LocalBase = UserDefaults.standard
     override func viewDidLoad() {
+        if let baseMaked = LocalBase.array(forKey: "TodoItemsList") as? [String]{
+            todoItems = baseMaked
+        }
         super.viewDidLoad()
     }
     
@@ -50,6 +54,7 @@ var todoItems = ["Buy eggs", "Buy machine", "make project"]
             } else {
                 self.todoItems.append(alertTextField.text!)
             }
+            self.LocalBase.set(self.todoItems, forKey: "TodoItemsList")
             self.tableView.reloadData()
         }
         alertForNameanItem.addAction(alertButtonPressed)
