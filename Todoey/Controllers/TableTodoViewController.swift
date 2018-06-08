@@ -10,19 +10,21 @@ import UIKit
 
 class TableTodoViewController: UITableViewController {
     var todoItems = [Item]()
-    var LocalBase = UserDefaults.standard
+    var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    let LocalBase = UserDefaults()
     
     
     override func viewDidLoad() {
         for counter in 0...3  {
             todoItems.append(Item(number: counter))
         }
+        print(dataFilePath)
         
         
         
-        if let baseMaked = LocalBase.array(forKey: "TodoItemsList") as? [Item]{
-            todoItems = baseMaked
-        }
+//        if let baseMaked = LocalBase.array(forKey: "TodoItemsList") as? [Item]{
+//            todoItems = baseMaked
+//        }
         super.viewDidLoad()
         
     }
@@ -50,7 +52,7 @@ class TableTodoViewController: UITableViewController {
         
         todoItems[indexPath.row].doneStatus = !todoItems[indexPath.row].doneStatus
         tableView.deselectRow(at: indexPath, animated: true)
-        tableView.reloadData()
+        updateItemData()
         
     }
     
@@ -67,8 +69,10 @@ class TableTodoViewController: UITableViewController {
             } else {
                 self.todoItems.append(Item(withTitle: alertTextField.text!))
             }
-            self.LocalBase.set(self.todoItems, forKey: "TodoItemsList")
-            self.tableView.reloadData()
+            
+            self.updateItemData()
+            
+
         }
         alertForNameanItem.addAction(alertButtonPressed)
 
@@ -81,6 +85,15 @@ class TableTodoViewController: UITableViewController {
 
 
     }
-    
+    func updateItemData (){
+        let encoder = PropertyListEncoder()
+        do{
+            let data = try encoder.encode(todoItems)
+            try data.write(to: dataFilePath!)
+        } catch{
+            print ("error encoding item array, \(error)")
+        }
+        tableView.reloadData()
+    }
 }
 

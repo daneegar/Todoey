@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Item {
+class Item: Encodable {
     static var counterOfItem = 1
     var title = "New Item"
     var doneStatus = false
