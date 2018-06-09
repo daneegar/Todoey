@@ -15,9 +15,8 @@ class TableTodoViewController: UITableViewController {
     
     
     override func viewDidLoad() {
-        for counter in 0...3  {
-            todoItems.append(Item(number: counter))
-        }
+        
+        readData()
         print(dataFilePath)
         
         
@@ -52,7 +51,7 @@ class TableTodoViewController: UITableViewController {
         
         todoItems[indexPath.row].doneStatus = !todoItems[indexPath.row].doneStatus
         tableView.deselectRow(at: indexPath, animated: true)
-        updateItemData()
+        setDate()
         
     }
     
@@ -70,7 +69,7 @@ class TableTodoViewController: UITableViewController {
                 self.todoItems.append(Item(withTitle: alertTextField.text!))
             }
             
-            self.updateItemData()
+            self.setDate()
             
 
         }
@@ -85,7 +84,7 @@ class TableTodoViewController: UITableViewController {
 
 
     }
-    func updateItemData (){
+    func setDate (){
         let encoder = PropertyListEncoder()
         do{
             let data = try encoder.encode(todoItems)
@@ -94,6 +93,18 @@ class TableTodoViewController: UITableViewController {
             print ("error encoding item array, \(error)")
         }
         tableView.reloadData()
+    }
+    
+    func readData(){
+        if let data = try? Data(contentsOf: dataFilePath!){
+            let decoder = PropertyListDecoder()
+            do {
+                 try todoItems = decoder.decode([Item].self, from: data)
+            } catch {
+                print("error decoding item array, \(error)")
+            }
+        }
+        
     }
 }
 
