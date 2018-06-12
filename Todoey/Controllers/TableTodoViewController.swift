@@ -7,17 +7,19 @@
 //
 
 import UIKit
+import CoreData
 
 class TableTodoViewController: UITableViewController {
     var todoItems = [Item]()
+    
     var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     let LocalBase = UserDefaults()
-    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         
-        readData()
-        print(dataFilePath)
+         readData()
+        //print(dataFilePath)
         
         
         
@@ -50,8 +52,8 @@ class TableTodoViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         todoItems[indexPath.row].doneStatus = !todoItems[indexPath.row].doneStatus
+        setData()
         tableView.deselectRow(at: indexPath, animated: true)
-        setDate()
         
     }
     
@@ -59,20 +61,20 @@ class TableTodoViewController: UITableViewController {
     //MARK: Add Item aciton decloration
     @IBAction func AddItem(_ sender: UIBarButtonItem) {
         var alertTextField = UITextField()
-
+        
         let alertForNameanItem = UIAlertController(title: "Add Item", message: "Name the deal", preferredStyle: .alert)
 
         let alertButtonPressed = UIAlertAction(title: "Add", style: .default) { (Alert) in
             if alertTextField.text == "" {
-                self.todoItems.append(Item())
+                self.todoItems.append(Item(insertIntoManagesObjectContext: self.context))
             } else {
-                self.todoItems.append(Item(withTitle: alertTextField.text!))
+                self.todoItems.append(Item(withTitle: alertTextField.text!, insertIntoManagesObjectContext: self.context))
             }
             
-            self.setDate()
+            self.setData()
             
 
-        }
+        } 
         alertForNameanItem.addAction(alertButtonPressed)
 
         alertForNameanItem.addTextField { (AlertTextInput) in
@@ -84,27 +86,59 @@ class TableTodoViewController: UITableViewController {
 
 
     }
-    func setDate (){
-        let encoder = PropertyListEncoder()
+    func setData (){
         do{
-            let data = try encoder.encode(todoItems)
-            try data.write(to: dataFilePath!)
+            try context.save()
         } catch{
-            print ("error encoding item array, \(error)")
+            print ("setting data error, \(error)")
         }
         tableView.reloadData()
     }
     
-    func readData(){
-        if let data = try? Data(contentsOf: dataFilePath!){
-            let decoder = PropertyListDecoder()
-            do {
-                 try todoItems = decoder.decode([Item].self, from: data)
-            } catch {
-                print("error decoding item array, \(error)")
-            }
+    func readData(wia request: NSFetchRequest<Item> = Item.fetchRequest()){
+        //let request: NSFetchRequest<Item> = Item.fetchRequest()
+        do {
+            todoItems = try context.fetch(request)
+        } catch {
+            print("loading data error, \(error)")
         }
-        
+        tableView.reloadData()
     }
 }
+//MARK - Searching fich
+extension TableTodoViewController: UISearchBarDelegate{
+    
+    
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        let predicate = NSPredicate (format: "title CONTAINS[cd] %@", searchBar.text!)
+         request.predicate = predicate
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        request.sortDescriptors = [sortDescriptor]
+        if searchBar.text! != ""{
+            readData(wia: request)
+        } else {
+            readData()
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
